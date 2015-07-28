@@ -38,3 +38,8 @@ func (c *Context) Text(code int, text string) {
 func (c *Context) TextOk(text string) {
 	c.Text(http.StatusOK, text)
 }
+
+func (c *Context) SeeOther(location string) {
+	c.ResponseWriter.Header().Set("Location", location)
+	c.ResponseWriter.WriteHeader(http.StatusSeeOther)
+}
