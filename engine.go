@@ -9,17 +9,23 @@ import (
 type Handler func(c *Context)
 
 type Engine struct {
-	router *httprouter.Router
+	router     *httprouter.Router
+	middleware []Handler
 }
 
 func New() *Engine {
 	return &Engine{
-		router: httprouter.New(),
+		router:     httprouter.New(),
+		middleware: make([]Handler, 0),
 	}
 }
 
 func (e *Engine) Run(addr string) {
 	http.ListenAndServe(addr, e.router)
+}
+
+func (e *Engine) Use(handler Handler) {
+	e.middleware = append(e.middleware, handler)
 }
 
 func (e *Engine) GET(path string, handler Handler) {
@@ -37,8 +43,10 @@ func (e *Engine) GET(path string, handler Handler) {
 			Params:         params,
 			Form:           r.Form,
 			PostForm:       r.PostForm,
+			engine:         e,
+			handler:        handler,
 		}
 
-		handler(&c)
+		c.Next()
 	})
 }

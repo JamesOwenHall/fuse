@@ -8,6 +8,7 @@ import (
 
 func main() {
 	f := fuse.New()
+	f.Use(fuse.Logger)
 
 	f.GET("/", func(c *fuse.Context) {
 		c.ResponseWriter.Write([]byte("hello world"))
