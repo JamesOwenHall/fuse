@@ -134,10 +134,7 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		params[param.Key] = param.Value
 	}
 
-	session, err := e.sessionStore.Get(r, "default")
-	if err != nil {
-		panic(err)
-	}
+	session, _ := e.sessionStore.Get(r, "default")
 
 	return &Context{
 		Request:        r,
