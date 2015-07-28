@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
 )
@@ -43,7 +44,7 @@ func New(sessionSecret []byte) *Engine {
 }
 
 func (e *Engine) Run(addr string) {
-	http.ListenAndServe(addr, e.router)
+	http.ListenAndServe(addr, context.ClearHandler(e.router))
 }
 
 func (e *Engine) Use(handler Handler) {
