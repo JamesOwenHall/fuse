@@ -5,6 +5,8 @@ import (
 	"time"
 )
 
+// Logger is a middleware component that logs each request to the log package's
+// output.
 func Logger(c *Context) {
 	start := time.Now()
 	c.Next()

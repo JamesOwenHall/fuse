@@ -6,6 +6,8 @@ import (
 	"github.com/gorilla/sessions"
 )
 
+// responseWriter is a wrapper for an http.ResponseWriter that saves an
+// Engine's session before writing.
 type responseWriter struct {
 	writer  http.ResponseWriter
 	request *http.Request

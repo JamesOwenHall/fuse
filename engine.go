@@ -11,11 +11,21 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
+// Handler is the type of function used to handle all requests in Fuse,
+// including middleware.
 type Handler func(c *Context)
 
+// Engine is the Fuse server.  It should always be created using the fuse.New
+// function.
 type Engine struct {
-	NotFound     Handler
-	PublicDir    string
+	// NotFound is called whenever a request comes in that isn't mapped to a
+	// handler and doesn't correspond to a file name in the public directory.
+	NotFound Handler
+	// PublicDir is the directory which holds all files that are publicly
+	// accessible.  The default is "public".
+	PublicDir string
+	// TempalteGlob is the glob that defines which files to parse as HTML
+	// templates.  The default is "templates/*.tpl"
 	TemplateGlob string
 
 	router       *httprouter.Router
@@ -23,6 +33,7 @@ type Engine struct {
 	sessionStore sessions.Store
 }
 
+// New returns an initialized instance of *Engine.
 func New(sessionSecret []byte) *Engine {
 	engine := &Engine{
 		PublicDir:    "public",
@@ -43,14 +54,27 @@ func New(sessionSecret []byte) *Engine {
 	return engine
 }
 
+// Run calls ListenAndServe.
 func (e *Engine) Run(addr string) {
 	http.ListenAndServe(addr, context.ClearHandler(e.router))
 }
 
+// Use adds the handler to the end of the middleware chain.
 func (e *Engine) Use(handler Handler) {
 	e.middleware = append(e.middleware, handler)
 }
 
+// GET defines a route for GET requests to the handler.  The path can contain
+// parameters prefixed with a colon (:).  For example, the following requests
+// would all be routed to the handler if we define the path as /user/:name
+//     /user/foo
+//     /user/bar
+//     /user/baz
+// However, the following paths would not be routed.
+//     /user
+//     /user/
+//     /user/foo/profile
+//     /profile/user/foo
 func (e *Engine) GET(path string, handler Handler) {
 	e.router.GET(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
@@ -58,6 +82,8 @@ func (e *Engine) GET(path string, handler Handler) {
 	})
 }
 
+// POST defines a route for POST requests to the handler.  See GET for
+// information about path parameters.
 func (e *Engine) POST(path string, handler Handler) {
 	e.router.POST(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
@@ -65,6 +91,8 @@ func (e *Engine) POST(path string, handler Handler) {
 	})
 }
 
+// PUT defines a route for PUT requests to the handler.  See GET for
+// information about path parameters.
 func (e *Engine) PUT(path string, handler Handler) {
 	e.router.PUT(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
@@ -72,6 +100,8 @@ func (e *Engine) PUT(path string, handler Handler) {
 	})
 }
 
+// DELETE defines a route for DELETE requests to the handler.  See GET for
+// information about path parameters.
 func (e *Engine) DELETE(path string, handler Handler) {
 	e.router.DELETE(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
@@ -79,6 +109,8 @@ func (e *Engine) DELETE(path string, handler Handler) {
 	})
 }
 
+// HEAD defines a route for HEAD requests to the handler.  See GET for
+// information about path parameters.
 func (e *Engine) HEAD(path string, handler Handler) {
 	e.router.HEAD(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
