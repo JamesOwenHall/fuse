@@ -1,6 +1,7 @@
 package fuse
 
 import (
+	"html/template"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -11,8 +12,9 @@ import (
 type Handler func(c *Context)
 
 type Engine struct {
-	NotFound  Handler
-	PublicDir string
+	NotFound     Handler
+	PublicDir    string
+	TemplateGlob string
 
 	router     *httprouter.Router
 	middleware []Handler
@@ -20,8 +22,9 @@ type Engine struct {
 
 func New() *Engine {
 	engine := &Engine{
-		PublicDir:  "public",
-		middleware: make([]Handler, 0),
+		PublicDir:    "public",
+		TemplateGlob: "templates/*.tpl",
+		middleware:   make([]Handler, 0),
 	}
 
 	engine.router = &httprouter.Router{
@@ -79,6 +82,16 @@ func (e *Engine) HEAD(path string, handler Handler) {
 	})
 }
 
+func (e *Engine) execTemplate(c *Context, name string) {
+	tmpl, err := template.ParseGlob(e.TemplateGlob)
+	if err != nil {
+		c.Text(http.StatusInternalServerError, "Error parsing template: "+err.Error())
+		return
+	}
+
+	tmpl.ExecuteTemplate(c.ResponseWriter, name, c.Data)
+}
+
 func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httprouter.Params, handler Handler) *Context {
 	r.ParseForm()
 
@@ -93,6 +106,7 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		Params:         params,
 		Form:           r.Form,
 		PostForm:       r.PostForm,
+		Data:           make(map[interface{}]interface{}),
 		engine:         e,
 		handler:        handler,
 	}

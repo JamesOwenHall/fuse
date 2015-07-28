@@ -14,7 +14,7 @@ func main() {
 	}
 
 	f.GET("/", func(c *fuse.Context) {
-		c.TextOk("hello world")
+		c.HtmlOk("home.tpl")
 	})
 	f.GET("/say", func(c *fuse.Context) {
 		words := strings.Join(c.Form["message"], " ")

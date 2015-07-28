@@ -11,6 +11,7 @@ type Context struct {
 	Params         map[string]string
 	Form           url.Values
 	PostForm       url.Values
+	Data           map[interface{}]interface{}
 
 	engine       *Engine
 	handlerIndex int
@@ -37,6 +38,15 @@ func (c *Context) Text(code int, text string) {
 
 func (c *Context) TextOk(text string) {
 	c.Text(http.StatusOK, text)
+}
+
+func (c *Context) Html(code int, name string) {
+	c.ResponseWriter.WriteHeader(code)
+	c.engine.execTemplate(c, name)
+}
+
+func (c *Context) HtmlOk(name string) {
+	c.Html(http.StatusOK, name)
 }
 
 func (c *Context) SeeOther(location string) {
