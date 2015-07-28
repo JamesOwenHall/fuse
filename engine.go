@@ -93,7 +93,7 @@ func (e *Engine) execTemplate(c *Context, name string) {
 		return
 	}
 
-	tmpl.ExecuteTemplate(c.ResponseWriter, name, c.Data)
+	tmpl.ExecuteTemplate(c.ResponseWriter, name, c.OutData)
 }
 
 func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httprouter.Params, handler Handler) *Context {
@@ -115,7 +115,8 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		Params:         params,
 		Form:           r.Form,
 		PostForm:       r.PostForm,
-		Data:           make(map[string]interface{}),
+		InData:         make(map[string]interface{}),
+		OutData:        make(map[string]interface{}),
 		Session:        session.Values,
 		engine:         e,
 		handler:        handler,

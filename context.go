@@ -12,7 +12,8 @@ type Context struct {
 	Params         map[string]string
 	Form           url.Values
 	PostForm       url.Values
-	Data           map[string]interface{}
+	InData         map[string]interface{}
+	OutData        map[string]interface{}
 	Session        map[interface{}]interface{}
 
 	engine       *Engine
@@ -56,7 +57,7 @@ func (c *Context) Json(code int) {
 	c.ResponseWriter.Header().Set("Content-Type", "application/json")
 	c.ResponseWriter.WriteHeader(code)
 	encoder := json.NewEncoder(c.ResponseWriter)
-	encoder.Encode(c.Data)
+	encoder.Encode(c.OutData)
 }
 
 func (c *Context) JsonOk() {

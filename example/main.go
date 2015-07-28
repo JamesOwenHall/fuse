@@ -16,11 +16,11 @@ func main() {
 	f.GET("/", func(c *fuse.Context) {
 		visits, exists := c.Session["visits"]
 		if !exists {
-			c.Data["visits"] = 0
+			c.OutData["visits"] = 0
 			c.Session["visits"] = 0
 		} else {
 			numVisits := visits.(int) + 1
-			c.Data["visits"] = numVisits
+			c.OutData["visits"] = numVisits
 			c.Session["visits"] = numVisits
 		}
 
@@ -31,7 +31,7 @@ func main() {
 		c.TextOk(words)
 	})
 	f.GET("/say/:message", func(c *fuse.Context) {
-		c.Data["message"] = c.Params["message"]
+		c.OutData["message"] = c.Params["message"]
 		c.JsonOk()
 	})
 
