@@ -3,8 +3,6 @@ package fuse
 import (
 	"html/template"
 	"net/http"
-	"os"
-	"path/filepath"
 
 	"github.com/gorilla/context"
 	"github.com/gorilla/sessions"
@@ -44,7 +42,7 @@ func New(sessionSecret []byte) *Engine {
 
 	engine.router = &httprouter.Router{
 		RedirectTrailingSlash: true,
-		NotFound:              &notFound{engine},
+		NotFound:              &fileServer{engine},
 	}
 
 	engine.NotFound = func(c *Context) {
@@ -152,18 +150,5 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		Session:        session.Values,
 		engine:         e,
 		handler:        handler,
-	}
-}
-
-func (e *Engine) notFoundHandler(w http.ResponseWriter, r *http.Request) {
-	filename := filepath.Join(e.PublicDir, r.URL.Path)
-	if _, err := os.Stat(filename); err == nil {
-		c := e.makeContext(w, r, nil, func(c *Context) {
-			http.ServeFile(c.ResponseWriter, c.Request, filename)
-		})
-		c.Next()
-	} else {
-		c := e.makeContext(w, r, nil, e.NotFound)
-		c.Next()
 	}
 }
