@@ -9,6 +9,9 @@ import (
 func main() {
 	f := fuse.New()
 	f.Use(fuse.Logger)
+	f.NotFound = func(c *fuse.Context) {
+		c.ResponseWriter.Write([]byte("Darn, not found"))
+	}
 
 	f.GET("/", func(c *fuse.Context) {
 		c.ResponseWriter.Write([]byte("hello world"))
