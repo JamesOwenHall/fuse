@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/gorilla/sessions"
 	"github.com/julienschmidt/httprouter"
 )
 
@@ -16,15 +17,17 @@ type Engine struct {
 	PublicDir    string
 	TemplateGlob string
 
-	router     *httprouter.Router
-	middleware []Handler
+	router       *httprouter.Router
+	middleware   []Handler
+	sessionStore sessions.Store
 }
 
-func New() *Engine {
+func New(sessionSecret []byte) *Engine {
 	engine := &Engine{
 		PublicDir:    "public",
 		TemplateGlob: "templates/*.tpl",
 		middleware:   make([]Handler, 0),
+		sessionStore: sessions.NewCookieStore(sessionSecret),
 	}
 
 	engine.router = &httprouter.Router{
@@ -100,13 +103,19 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		params[param.Key] = param.Value
 	}
 
+	session, err := e.sessionStore.Get(r, "default")
+	if err != nil {
+		panic(err)
+	}
+
 	return &Context{
 		Request:        r,
-		ResponseWriter: responseWriter{w},
+		ResponseWriter: &responseWriter{w, r, session, false},
 		Params:         params,
 		Form:           r.Form,
 		PostForm:       r.PostForm,
 		Data:           make(map[string]interface{}),
+		Session:        session.Values,
 		engine:         e,
 		handler:        handler,
 	}

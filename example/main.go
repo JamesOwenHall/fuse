@@ -7,13 +7,23 @@ import (
 )
 
 func main() {
-	f := fuse.New()
+	f := fuse.New([]byte(`my-secret`))
 	f.Use(fuse.Logger)
 	f.NotFound = func(c *fuse.Context) {
 		c.ResponseWriter.Write([]byte("Darn, not found"))
 	}
 
 	f.GET("/", func(c *fuse.Context) {
+		visits, exists := c.Session["visits"]
+		if !exists {
+			c.Data["visits"] = 0
+			c.Session["visits"] = 0
+		} else {
+			numVisits := visits.(int) + 1
+			c.Data["visits"] = numVisits
+			c.Session["visits"] = numVisits
+		}
+
 		c.HtmlOk("home.tpl")
 	})
 	f.GET("/say", func(c *fuse.Context) {

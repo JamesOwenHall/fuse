@@ -13,6 +13,7 @@ type Context struct {
 	Form           url.Values
 	PostForm       url.Values
 	Data           map[string]interface{}
+	Session        map[interface{}]interface{}
 
 	engine       *Engine
 	handlerIndex int
