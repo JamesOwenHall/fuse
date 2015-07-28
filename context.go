@@ -1,6 +1,7 @@
 package fuse
 
 import (
+	"encoding/json"
 	"net/http"
 	"net/url"
 )
@@ -11,7 +12,7 @@ type Context struct {
 	Params         map[string]string
 	Form           url.Values
 	PostForm       url.Values
-	Data           map[interface{}]interface{}
+	Data           map[string]interface{}
 
 	engine       *Engine
 	handlerIndex int
@@ -32,6 +33,7 @@ func (c *Context) Next() {
 }
 
 func (c *Context) Text(code int, text string) {
+	c.ResponseWriter.Header().Set("Content-Type", "text/plain")
 	c.ResponseWriter.WriteHeader(code)
 	c.ResponseWriter.Write([]byte(text))
 }
@@ -47,6 +49,17 @@ func (c *Context) Html(code int, name string) {
 
 func (c *Context) HtmlOk(name string) {
 	c.Html(http.StatusOK, name)
+}
+
+func (c *Context) Json(code int) {
+	c.ResponseWriter.Header().Set("Content-Type", "application/json")
+	c.ResponseWriter.WriteHeader(code)
+	encoder := json.NewEncoder(c.ResponseWriter)
+	encoder.Encode(c.Data)
+}
+
+func (c *Context) JsonOk() {
+	c.Json(http.StatusOK)
 }
 
 func (c *Context) SeeOther(location string) {

@@ -106,7 +106,7 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		Params:         params,
 		Form:           r.Form,
 		PostForm:       r.PostForm,
-		Data:           make(map[interface{}]interface{}),
+		Data:           make(map[string]interface{}),
 		engine:         e,
 		handler:        handler,
 	}

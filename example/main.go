@@ -21,7 +21,8 @@ func main() {
 		c.TextOk(words)
 	})
 	f.GET("/say/:message", func(c *fuse.Context) {
-		c.TextOk(c.Params["message"])
+		c.Data["message"] = c.Params["message"]
+		c.JsonOk()
 	})
 
 	f.Run(":3000")
