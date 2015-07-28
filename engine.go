@@ -51,6 +51,34 @@ func (e *Engine) GET(path string, handler Handler) {
 	})
 }
 
+func (e *Engine) POST(path string, handler Handler) {
+	e.router.POST(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		c := e.makeContext(w, r, p, handler)
+		c.Next()
+	})
+}
+
+func (e *Engine) PUT(path string, handler Handler) {
+	e.router.PUT(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		c := e.makeContext(w, r, p, handler)
+		c.Next()
+	})
+}
+
+func (e *Engine) DELETE(path string, handler Handler) {
+	e.router.DELETE(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		c := e.makeContext(w, r, p, handler)
+		c.Next()
+	})
+}
+
+func (e *Engine) HEAD(path string, handler Handler) {
+	e.router.HEAD(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		c := e.makeContext(w, r, p, handler)
+		c.Next()
+	})
+}
+
 func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httprouter.Params, handler Handler) *Context {
 	r.ParseForm()
 
