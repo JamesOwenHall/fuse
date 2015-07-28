@@ -24,9 +24,15 @@ func (e *Engine) Run(addr string) {
 
 func (e *Engine) GET(path string, handler Handler) {
 	e.router.GET(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
+		params := make(map[string]string)
+		for _, param := range p {
+			params[param.Key] = param.Value
+		}
+
 		c := Context{
 			Request:        r,
 			ResponseWriter: responseWriter{w},
+			Params:         params,
 		}
 
 		handler(&c)
