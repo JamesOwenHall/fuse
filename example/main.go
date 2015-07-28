@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/JamesOwenHall/fuse"
 )
 
@@ -9,6 +11,10 @@ func main() {
 
 	f.GET("/", func(c *fuse.Context) {
 		c.ResponseWriter.Write([]byte("hello world"))
+	})
+	f.GET("/say", func(c *fuse.Context) {
+		words := strings.Join(c.Form["message"], " ")
+		c.ResponseWriter.Write([]byte(words))
 	})
 	f.GET("/say/:message", func(c *fuse.Context) {
 		c.ResponseWriter.Write([]byte(c.Params["message"]))
