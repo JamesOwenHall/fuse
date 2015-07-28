@@ -29,3 +29,12 @@ func (c *Context) Next() {
 		panic("Can't call Context.Next() on handler")
 	}
 }
+
+func (c *Context) Text(code int, text string) {
+	c.ResponseWriter.WriteHeader(code)
+	c.ResponseWriter.Write([]byte(text))
+}
+
+func (c *Context) TextOk(text string) {
+	c.Text(http.StatusOK, text)
+}

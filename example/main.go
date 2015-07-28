@@ -14,14 +14,14 @@ func main() {
 	}
 
 	f.GET("/", func(c *fuse.Context) {
-		c.ResponseWriter.Write([]byte("hello world"))
+		c.TextOk("hello world")
 	})
 	f.GET("/say", func(c *fuse.Context) {
 		words := strings.Join(c.Form["message"], " ")
-		c.ResponseWriter.Write([]byte(words))
+		c.TextOk(words)
 	})
 	f.GET("/say/:message", func(c *fuse.Context) {
-		c.ResponseWriter.Write([]byte(c.Params["message"]))
+		c.TextOk(c.Params["message"])
 	})
 
 	f.Run(":3000")
