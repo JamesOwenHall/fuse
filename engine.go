@@ -19,6 +19,8 @@ type Engine struct {
 	// NotFound is called whenever a request comes in that isn't mapped to a
 	// handler and doesn't correspond to a file name in the public directory.
 	NotFound Handler
+	// Panic is called whenever a request panics.
+	Panic Handler
 	// PublicDir is the directory which holds all files that are publicly
 	// accessible.  The default is "public".
 	PublicDir string
@@ -49,6 +51,10 @@ func New(sessionSecret []byte) *Engine {
 		http.NotFound(c.ResponseWriter, c.Request)
 	}
 
+	engine.Panic = func(c *Context) {
+		c.Text(http.StatusInternalServerError, "Internal server error")
+	}
+
 	return engine
 }
 
@@ -76,6 +82,7 @@ func (e *Engine) Use(handler Handler) {
 func (e *Engine) GET(path string, handler Handler) {
 	e.router.GET(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
+		defer e.recoverFromPanic(c)
 		c.Next()
 	})
 }
@@ -85,6 +92,7 @@ func (e *Engine) GET(path string, handler Handler) {
 func (e *Engine) POST(path string, handler Handler) {
 	e.router.POST(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
+		defer e.recoverFromPanic(c)
 		c.Next()
 	})
 }
@@ -94,6 +102,7 @@ func (e *Engine) POST(path string, handler Handler) {
 func (e *Engine) PUT(path string, handler Handler) {
 	e.router.PUT(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
+		defer e.recoverFromPanic(c)
 		c.Next()
 	})
 }
@@ -103,6 +112,7 @@ func (e *Engine) PUT(path string, handler Handler) {
 func (e *Engine) DELETE(path string, handler Handler) {
 	e.router.DELETE(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
+		defer e.recoverFromPanic(c)
 		c.Next()
 	})
 }
@@ -112,6 +122,7 @@ func (e *Engine) DELETE(path string, handler Handler) {
 func (e *Engine) HEAD(path string, handler Handler) {
 	e.router.HEAD(path, func(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
 		c := e.makeContext(w, r, p, handler)
+		defer e.recoverFromPanic(c)
 		c.Next()
 	})
 }
@@ -147,5 +158,11 @@ func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httproute
 		Session:        session.Values,
 		engine:         e,
 		handler:        handler,
+	}
+}
+
+func (e *Engine) recoverFromPanic(c *Context) {
+	if r := recover(); r != nil {
+		e.Panic(c)
 	}
 }
