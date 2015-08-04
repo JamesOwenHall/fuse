@@ -130,11 +130,13 @@ func (e *Engine) HEAD(path string, handler Handler) {
 func (e *Engine) execTemplate(c *Context, name string) {
 	tmpl, err := template.ParseGlob(e.TemplateGlob)
 	if err != nil {
-		c.Text(http.StatusInternalServerError, "Error parsing template: "+err.Error())
-		return
+		panic(err)
 	}
 
-	tmpl.ExecuteTemplate(c.ResponseWriter, name, c.OutData)
+	err = tmpl.ExecuteTemplate(c.ResponseWriter, name, c.OutData)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (e *Engine) makeContext(w http.ResponseWriter, r *http.Request, p httprouter.Params, handler Handler) *Context {
