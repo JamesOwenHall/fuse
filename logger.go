@@ -11,7 +11,7 @@ func Logger(c *Context) {
 	start := time.Now()
 	defer func() {
 		if r := recover(); r != nil {
-			log.Println("PANIC", c.Request.Method, "->", c.Request.URL.String())
+			log.Println("PANIC", r, "-", c.Request.Method, "->", c.Request.URL.String())
 			panic(r)
 		}
 	}()
